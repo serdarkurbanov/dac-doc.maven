@@ -18,6 +18,7 @@ package org.flussig.documentation;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Mojo;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -30,7 +31,8 @@ import java.io.IOException;
  * 
  * @phase process-sources
  */
-public class MyMojo
+@Mojo(name = "dac-doc")
+public class DacDoc
     extends AbstractMojo
 {
     /**

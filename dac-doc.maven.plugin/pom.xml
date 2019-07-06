@@ -6,9 +6,9 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>doc-dac.maven.plugin</artifactId>
+    <artifactId>dac-doc.maven.plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <name>doc-dac.maven.plugin Maven Mojo</name>
+    <name>dac-doc.maven.plugin Maven Mojo</name>
     <url>http://maven.apache.org</url>
     <dependencies>
         <dependency>
@@ -21,6 +21,12 @@
             <artifactId>junit</artifactId>
             <version>3.8.1</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.plugin-tools</groupId>
+            <artifactId>maven-plugin-annotations</artifactId>
+            <version>3.6.0</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

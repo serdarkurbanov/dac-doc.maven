@@ -6,8 +6,8 @@
   <packaging>pom</packaging>
   <version>0.0.1-SNAPSHOT</version>
   <modules>
-    <module>dac-doc.maven.plugin.test</module>
     <module>dac-doc.maven.plugin</module>
+    <module>dac-doc.maven.plugin.test</module>
   </modules>
   <name>dac-doc.maven</name>
   <url>http://maven.apache.org</url>

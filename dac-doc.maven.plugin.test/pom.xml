@@ -72,6 +72,12 @@
                     <artifactId>maven-project-info-reports-plugin</artifactId>
                     <version>3.0.0</version>
                 </plugin>
+
+                <!-- dac-doc plugin under test -->
+                <plugin>
+                    <artifactId>dac-doc.maven.plugin</artifactId>
+                    <version>${parent.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
