@@ -11,7 +11,7 @@
 
     <artifactId>dacdoc-maven-plugin-test</artifactId>
 
-    <name>dac-doc.maven.plugin.test</name>
+    <name>dacdoc-maven-plugin-test</name>
     <!-- FIXME change it to the project's website -->
     <url>http://www.example.com</url>
 
@@ -73,7 +73,7 @@
                     <version>3.0.0</version>
                 </plugin>
 
-                <!-- dac-doc plugin under test -->
+                <!-- dacdoc plugin under test -->
                 <plugin>
                     <artifactId>dacdoc-maven-plugin</artifactId>
                     <version>${project.version}</version>
