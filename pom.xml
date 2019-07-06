@@ -2,10 +2,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.flussig.documentation</groupId>
-  <artifactId>dac-doc.maven.plugin</artifactId>
-  <packaging>maven-plugin</packaging>
+  <artifactId>dac-doc.maven</artifactId>
+  <packaging>pom</packaging>
   <version>0.0.1-SNAPSHOT</version>
-  <name>dac-doc.maven.plugin</name>
+  <modules>
+    <module>dac-doc.maven.plugin.test</module>
+    <module>dac-doc.maven.plugin</module>
+  </modules>
+  <name>dac-doc.maven</name>
   <url>http://maven.apache.org</url>
 
   <properties>
