@@ -3,13 +3,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>dac-doc.maven</artifactId>
+        <artifactId>dacdoc-maven</artifactId>
         <groupId>org.flussig.documentation</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>dac-doc.maven.plugin.test</artifactId>
+    <artifactId>dacdoc-maven-plugin-test</artifactId>
 
     <name>dac-doc.maven.plugin.test</name>
     <!-- FIXME change it to the project's website -->
@@ -75,8 +75,8 @@
 
                 <!-- dac-doc plugin under test -->
                 <plugin>
-                    <artifactId>dac-doc.maven.plugin</artifactId>
-                    <version>${parent.version}</version>
+                    <artifactId>dacdoc-maven-plugin</artifactId>
+                    <version>${project.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -31,7 +31,7 @@ import java.io.IOException;
  * 
  * @phase process-sources
  */
-@Mojo(name = "dac-doc")
+@Mojo(name = "compile")
 public class DacDoc
     extends AbstractMojo
 {
@@ -45,6 +45,8 @@ public class DacDoc
     public void execute()
         throws MojoExecutionException
     {
+        getLog().info( "Hello, world." );
+
         File f = outputDirectory;
 
         if ( !f.exists() )
