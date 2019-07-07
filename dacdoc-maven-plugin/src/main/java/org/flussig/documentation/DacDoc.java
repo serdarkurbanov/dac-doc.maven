@@ -25,11 +25,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * Goal which touches a timestamp file.
- *
- * @goal touch
- * 
- * @phase process-sources
+ * Compile goal: searches through README.md files in source directory and subdirectories, replaces the
  */
 @Mojo(name = "compile")
 public class DacDoc
