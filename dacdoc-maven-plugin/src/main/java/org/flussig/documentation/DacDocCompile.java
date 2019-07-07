@@ -25,10 +25,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * Compile goal: searches through README.md files in source directory and subdirectories, replaces the
+ * Compile goal:
+ * searches through README.md files in source directory and subdirectories,
+ * replaces placeholders for DACDOC tests with green/red/orange/grey pics
  */
 @Mojo(name = "compile")
-public class DacDoc
+public class DacDocCompile
     extends AbstractMojo
 {
     /**
@@ -38,9 +40,28 @@ public class DacDoc
      */
     private File outputDirectory;
 
-    public void execute()
-        throws MojoExecutionException
+    public void execute() throws MojoExecutionException
     {
+        try {
+            // prepare source directory: create resource folder with images for test results (if not exists)
+
+            // collect all readme files
+
+            // collect all DACDOC placeholders within readme files
+
+            // create map of DACDOC placeholders in readme files to DACDOC checks
+
+            // validate for consistency of DACDOC checks
+
+            // perform all DACDOC checks
+
+            // replace DACDOC placeholders with indicators of test results
+
+            // add indicators of test results to each readme file
+        } catch(Exception e) {
+            throw new MojoExecutionException("exception while executing dacdoc-maven-plugin compile goal", e);
+        }
+
         getLog().info( "Hello, world." );
 
         File f = outputDirectory;
