@@ -36,13 +36,14 @@ public final class DacDocAnchor {
         // extract content from {...} and parameters from (...)
         ContentParameterTuple contentParameterTuple = new ContentParameterTuple(fullTextStripFraming);
 
-        if(!(fullTextStripFraming.startsWith("{") || fullTextStripFraming.startsWith("{")) ||
+        if(!(fullTextStripFraming.startsWith("{") || fullTextStripFraming.startsWith("(")) ||
                 (contentParameterTuple.content == null && contentParameterTuple.paremeters == null)) {
             throw new DacDocParseException(
                     String.format(
-                            "expected format for DACDOC placeholder: %s or %s",
+                            "expected format for DACDOC placeholder parameters: %s or %s. Given string: %s",
                             String.format("%s%s{...}(...)%s", Constants.ANCHOR_FRAMING, Constants.ANCHOR_KEYWORD, Constants.ANCHOR_FRAMING),
-                            String.format("%s%s(...)%s", Constants.ANCHOR_FRAMING, Constants.ANCHOR_KEYWORD, Constants.ANCHOR_FRAMING)));
+                            String.format("%s%s(...)%s", Constants.ANCHOR_FRAMING, Constants.ANCHOR_KEYWORD, Constants.ANCHOR_FRAMING),
+                            fullTextStripFraming));
         }
 
         // parameters are present
@@ -155,6 +156,11 @@ public final class DacDocAnchor {
     @Override
     public int hashCode() {
         return Objects.hash(fullText);
+    }
+
+    @Override
+    public String toString() {
+        return fullText;
     }
 
     /**

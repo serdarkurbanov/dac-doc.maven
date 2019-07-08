@@ -6,6 +6,7 @@ import org.flussig.documentation.exception.DacDocParseException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class DacDocReader {
 
             // extract all DACDOC placeholders
             Matcher dacdocPlaceholderMatcher = Pattern.compile(String.format(
-                    "^%s%s|%s$",
+                    "%s%s((.|\\n|\\r)*?)%s",
                     Constants.ANCHOR_FRAMING,
                     Constants.ANCHOR_KEYWORD,
                     Constants.ANCHOR_FRAMING)).matcher(content);
