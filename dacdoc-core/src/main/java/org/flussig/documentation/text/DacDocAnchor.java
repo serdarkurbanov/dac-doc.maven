@@ -2,6 +2,7 @@ package org.flussig.documentation.text;
 
 import org.flussig.documentation.Constants;
 import org.flussig.documentation.exception.DacDocException;
+import org.flussig.documentation.test.DacDocTestResult;
 import org.flussig.documentation.util.Strings;
 
 import java.util.*;
@@ -100,6 +101,14 @@ public final class DacDocAnchor {
      */
     public DacDocValidationResult validate() {
         return new DacDocValidationResult();
+    }
+
+    /**
+     * Prepares text of the anchor for replacement
+     * When test result is acquired, this method will return full text of anchor with DACDOC placeholder stripped away and decorations for showing test results added
+     */
+    public String getFullText(DacDocTestResult testResult) {
+        return null;
     }
 
     public String getFullText() {
