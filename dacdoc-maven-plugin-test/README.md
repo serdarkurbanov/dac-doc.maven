@@ -21,6 +21,7 @@ Proof that without framing `!` signs, DACDOC is not a keyword: DACDOC{[self](./R
 
 ## Using DACDOC in tables
 Table:
+
 | column A      | column B |
 | ------------- | -----:|
 | checking connection to !DACDOC{[google](https://www.google.com)}!      | now connection to !DACDOC{[stackoverflow](https://stackoverflow.com)}! |
