@@ -1,7 +1,7 @@
 package org.flussig.documentation.text;
 
 import org.flussig.documentation.Constants;
-import org.flussig.documentation.exception.DacDocException;
+import org.flussig.documentation.exception.DacDocParseException;
 import org.flussig.documentation.test.DacDocTestResult;
 import org.flussig.documentation.util.Strings;
 
@@ -23,7 +23,7 @@ public final class DacDocAnchor {
     /**
      * Generate anchor instance from full string
      */
-    public static DacDocAnchor from(String fullText) throws DacDocException {
+    public static DacDocAnchor from(String fullText) throws DacDocParseException {
         // format of full text of anchor is !DACDOC{...}(...)! for primitive type or !DACDOC(...)! for composite type
         String fullTextStripFraming = fullText.replaceAll(
                 String.format(
@@ -38,7 +38,7 @@ public final class DacDocAnchor {
 
         if(!(fullTextStripFraming.startsWith("{") || fullTextStripFraming.startsWith("{")) ||
                 (contentParameterTuple.content == null && contentParameterTuple.paremeters == null)) {
-            throw new DacDocException(
+            throw new DacDocParseException(
                     String.format(
                             "expected format for DACDOC placeholder: %s or %s",
                             String.format("%s%s{...}(...)%s", Constants.ANCHOR_FRAMING, Constants.ANCHOR_KEYWORD, Constants.ANCHOR_FRAMING),
@@ -140,6 +140,22 @@ public final class DacDocAnchor {
     }
 
     private DacDocAnchor() {}
+
+    /**
+     * Identity of anchor is defined by its full text
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DacDocAnchor that = (DacDocAnchor) o;
+        return Objects.equals(fullText, that.fullText);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fullText);
+    }
 
     /**
      * Tuple of content string and parameter string of a anchor
