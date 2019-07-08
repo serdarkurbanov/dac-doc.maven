@@ -9,9 +9,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>dacdoc-maven-plugin-test</artifactId>
+    <artifactId>dacdoc-git</artifactId>
 
-    <name>dacdoc-maven-plugin-test</name>
+    <name>dacdoc-git</name>
 
     <dependencies>
         <dependency>
@@ -63,12 +63,6 @@
                 <plugin>
                     <artifactId>maven-project-info-reports-plugin</artifactId>
                     <version>3.0.0</version>
-                </plugin>
-
-                <!-- dacdoc plugin under test -->
-                <plugin>
-                    <artifactId>dacdoc-maven-plugin</artifactId>
-                    <version>${project.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
