@@ -18,5 +18,12 @@ public interface Constants {
     String ANCHOR_PARAMETER_TEST_ID = "test";
     String ANCHOR_PARAMETER_IDS = "ids";
 
+    // default tests
     String DEFAULT_TEST_ID = "dacdoc-url";
+
+    // names of pictogram files
+    String GREEN_IND = "circle-green-12px.png";
+    String ORANGE_IND = "circle-orange-12px.png";
+    String RED_IND = "circle-red-12px.png";
+    String GREY_IND = "circle-grey-12px.png";
 }

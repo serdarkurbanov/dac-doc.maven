@@ -2,6 +2,7 @@ package org.flussig.documentation.text;
 
 import org.flussig.documentation.Constants;
 import org.flussig.documentation.check.Check;
+import org.flussig.documentation.check.CheckResult;
 import org.flussig.documentation.check.CompositeCheck;
 import org.flussig.documentation.check.UrlCheck;
 import org.flussig.documentation.exception.DacDocException;
@@ -99,8 +100,31 @@ public class Reader {
     /**
      * loops through anchor-check map and replace anchors with results in files
      */
-    public static void replaceAnchorsWithResults(Map<FileAnchorTuple, Check> checkMap) {
+    public static void replaceAnchorsWithResults(Map<FileAnchorTuple, Check> checkMap) throws DacDocParseException {
+        Map<File, String> processedFiles = checkMap.keySet().stream()
+                .map(FileAnchorTuple::getFile)
+                .collect(Collectors.toMap(f -> f, f -> {
+                    try {
+                        return Files.readString(f.toPath());
+                    } catch(IOException e) {
+                        return null;
+                    }
+                }));
 
+        // replace with new content
+        for(var anchorCheck: checkMap.entrySet()) {
+            Anchor anchor = anchorCheck.getKey().getAnchor();
+            File file = anchorCheck.getKey().getFile();
+            Check check = anchorCheck.getValue();
+
+            CheckResult checkResult = check.execute();
+
+            String newFileContent = processedFiles
+                    .get(file)
+                    .replace(anchor.getFullText(), anchor.getFullText(checkResult));
+
+            processedFiles.put(file, newFileContent);
+        }
     }
 
     // TODO: avoid circular dependencies for composite checks
