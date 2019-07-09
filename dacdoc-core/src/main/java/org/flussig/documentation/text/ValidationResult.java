@@ -6,7 +6,7 @@ import java.util.Collection;
 /**
  * Result for validation of internal consistency of DacDoc placeholders/texts
  */
-public class DacDocValidationResult {
+public class ValidationResult {
     private Collection<String> issues = new ArrayList<>();
 
     public Collection<String> getIssues() {

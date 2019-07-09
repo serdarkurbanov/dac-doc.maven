@@ -10,7 +10,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class DacDocReaderTest {
+public class ReaderTest {
 
     @Test
     public void parseFilesTest() {
@@ -23,7 +23,7 @@ public class DacDocReaderTest {
         files.add(readme);
 
         try {
-            Map<File, Set<DacDocAnchor>> parsedAchors = DacDocReader.parseFiles(files);
+            Map<File, Set<Anchor>> parsedAchors = Reader.parseFiles(files);
 
             assertEquals( 10, parsedAchors.get(readme).size());
         } catch(Exception e) {

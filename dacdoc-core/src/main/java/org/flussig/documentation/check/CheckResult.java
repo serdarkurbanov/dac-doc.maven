@@ -1,18 +1,18 @@
-package org.flussig.documentation.test;
+package org.flussig.documentation.check;
 
 import java.util.Collection;
 
 /**
- * Result of the test
- * GREY: test not found or failed to execute
- * GREEN: test passed successfully
- * ORANGE: some tests a composite test have passed successfully, some are not
- * RED: test failed
+ * Result of the check
+ * GREY: check not found or failed to execute
+ * GREEN: check passed successfully
+ * ORANGE: some tests a composite check have passed successfully, some are not
+ * RED: check failed
  */
-public enum DacDocTestResult {
+public enum CheckResult {
     GREY, GREEN, ORANGE, RED;
 
-    public DacDocTestResult fromMultiple(Collection<DacDocTestResult> testResults) {
+    public static CheckResult fromMultiple(Collection<CheckResult> testResults) {
         if(testResults == null || testResults.isEmpty()) {
             return GREY;
         }

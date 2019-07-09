@@ -2,7 +2,7 @@ package org.flussig.documentation.text;
 
 import org.flussig.documentation.Constants;
 import org.flussig.documentation.exception.DacDocParseException;
-import org.flussig.documentation.test.DacDocTestResult;
+import org.flussig.documentation.check.CheckResult;
 import org.flussig.documentation.util.Strings;
 
 import java.util.*;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Class contains information of DACDOC placeholder and associated tags
  */
-public final class DacDocAnchor {
+public final class Anchor {
     protected String fullText;
     protected String id;
     private Collection<String> ids = new ArrayList<>();
@@ -23,7 +23,7 @@ public final class DacDocAnchor {
     /**
      * Generate anchor instance from full string
      */
-    public static DacDocAnchor from(String fullText) throws DacDocParseException {
+    public static Anchor from(String fullText) throws DacDocParseException {
         // format of full text of anchor is !DACDOC{...}(...)! for primitive type or !DACDOC(...)! for composite type
         String fullTextStripFraming = fullText.replaceAll(
                 String.format(
@@ -50,20 +50,20 @@ public final class DacDocAnchor {
         Map<String, String> paramMap = extractParameterMap(contentParameterTuple);
 
         // content present -> primitive anchor type; if not -> complex type
-        DacDocAnchor result = getAnchor(contentParameterTuple.content, paramMap);
+        Anchor result = getAnchor(contentParameterTuple.content, paramMap);
 
         result.fullText = fullText;
 
         return result;
     }
 
-    private static DacDocAnchor getAnchor(String content, Map<String, String> paramMap) {
-        DacDocAnchor result = new DacDocAnchor();
+    private static Anchor getAnchor(String content, Map<String, String> paramMap) {
+        Anchor result = new Anchor();
 
         // attach argument
         result.argument = content;
 
-        // attach id of the test
+        // attach id of the check
         if(paramMap != null && !paramMap.isEmpty() && paramMap.containsKey(Constants.ANCHOR_PARAMETER_TEST_ID)) {
             result.testId = paramMap.get(Constants.ANCHOR_PARAMETER_TEST_ID);
         } else {
@@ -100,15 +100,15 @@ public final class DacDocAnchor {
     /**
      * Check anchor for internal consistency
      */
-    public DacDocValidationResult validate() {
-        return new DacDocValidationResult();
+    public ValidationResult validate() {
+        return new ValidationResult();
     }
 
     /**
      * Prepares text of the anchor for replacement
-     * When test result is acquired, this method will return full text of anchor with DACDOC placeholder stripped away and decorations for showing test results added
+     * When check result is acquired, this method will return full text of anchor with DACDOC placeholder stripped away and decorations for showing check results added
      */
-    public String getFullText(DacDocTestResult testResult) {
+    public String getFullText(CheckResult testResult) {
         return null;
     }
 
@@ -132,15 +132,15 @@ public final class DacDocAnchor {
         return testId;
     }
 
-    public DacDocAnchorType getAnchorType() {
+    public AnchorType getAnchorType() {
         if(ids.isEmpty()) {
-            return DacDocAnchorType.PRIMITIVE;
+            return AnchorType.PRIMITIVE;
         } else {
-            return DacDocAnchorType.COMPOSITE;
+            return AnchorType.COMPOSITE;
         }
     }
 
-    private DacDocAnchor() {}
+    private Anchor() {}
 
     /**
      * Identity of anchor is defined by its full text
@@ -149,7 +149,7 @@ public final class DacDocAnchor {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DacDocAnchor that = (DacDocAnchor) o;
+        Anchor that = (Anchor) o;
         return Objects.equals(fullText, that.fullText);
     }
 

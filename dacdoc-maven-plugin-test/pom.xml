@@ -65,7 +65,7 @@
                     <version>3.0.0</version>
                 </plugin>
 
-                <!-- dacdoc plugin under test -->
+                <!-- dacdoc plugin under check -->
                 <plugin>
                     <artifactId>dacdoc-maven-plugin</artifactId>
                     <version>${project.version}</version>

@@ -43,7 +43,7 @@ public class DacDocCompile
     public void execute() throws MojoExecutionException
     {
         try {
-            // prepare source directory: create resource folder with images for test results (if not exists)
+            // prepare source directory: create resource folder with images for check results (if not exists)
 
             // collect all readme files
 
@@ -55,9 +55,9 @@ public class DacDocCompile
 
             // perform all DACDOC checks
 
-            // replace DACDOC placeholders with indicators of test results
+            // replace DACDOC placeholders with indicators of check results
 
-            // add indicators of test results to each readme file
+            // add indicators of check results to each readme file
         } catch(Exception e) {
             throw new MojoExecutionException("exception while executing dacdoc-maven-plugin compile goal", e);
         }

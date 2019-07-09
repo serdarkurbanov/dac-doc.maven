@@ -1,31 +1,50 @@
 package org.flussig.documentation.text;
 
 import org.flussig.documentation.Constants;
+import org.flussig.documentation.exception.DacDocException;
 import org.flussig.documentation.exception.DacDocParseException;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Reader accepts File handlers for given project and extracts all DacDoc anchors (placeholders)
  */
-public class DacDocReader {
+public class Reader {
+    /**
+     * Get all markup files in given directory
+     */
+    public static Collection<File> getMarkupFiles(Path path) throws DacDocException {
+        List<File> result = new ArrayList<>();
+
+        try {
+            Files.walk(path)
+                    .filter(Files::isRegularFile)
+                    .map(Path::toFile)
+                    .filter(file -> file.getName().endsWith(".md"))
+                    .forEach(result::add);
+        } catch(Exception e) {
+            throw new DacDocException(
+                    String.format(
+                            "traversing root folder %s throws exception", path), e);
+        }
+
+        return result;
+    }
+
     /**
      * Parse files and extract anchors
      */
-    public static Map<File, Set<DacDocAnchor>> parseFiles(Set<File> files) throws IOException, DacDocParseException {
-        Map<File, Set<DacDocAnchor>> result = new HashMap<>();
+    public static Map<File, Set<Anchor>> parseFiles(Set<File> files) throws IOException, DacDocParseException {
+        Map<File, Set<Anchor>> result = new HashMap<>();
 
         for(File f: files) {
-            Set<DacDocAnchor> anchors = new HashSet<>();
+            Set<Anchor> anchors = new HashSet<>();
             result.put(f, anchors);
 
             String content = Files.readString(f.toPath());
@@ -40,9 +59,9 @@ public class DacDocReader {
             while(dacdocPlaceholderMatcher.find()) {
                 String dacdocAnchorFullText = dacdocPlaceholderMatcher.group();
 
-                DacDocAnchor dacDocAnchor = DacDocAnchor.from(dacdocAnchorFullText);
+                Anchor anchor = Anchor.from(dacdocAnchorFullText);
 
-                anchors.add(dacDocAnchor);
+                anchors.add(anchor);
             }
         }
 

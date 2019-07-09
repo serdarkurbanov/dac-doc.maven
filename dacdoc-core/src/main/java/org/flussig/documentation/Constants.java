@@ -15,7 +15,7 @@ public interface Constants {
 
     // names of the parameters
     String ANCHOR_PARAMETER_ID = "id";
-    String ANCHOR_PARAMETER_TEST_ID = "test";
+    String ANCHOR_PARAMETER_TEST_ID = "check";
     String ANCHOR_PARAMETER_IDS = "ids";
 
     String DEFAULT_TEST_ID = "dacdoc-url";
