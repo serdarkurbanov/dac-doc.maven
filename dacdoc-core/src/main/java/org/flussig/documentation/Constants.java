@@ -26,4 +26,8 @@ public interface Constants {
     String ORANGE_IND = "circle-orange-12px.png";
     String RED_IND = "circle-red-12px.png";
     String GREY_IND = "circle-grey-12px.png";
+
+    // name of dacdoc-resources directory
+    String RESOURCES = "resources";
+    String DACDOC_RESOURCES = "dacdoc-resources";
 }

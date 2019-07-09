@@ -19,10 +19,18 @@ package org.flussig.documentation;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.flussig.documentation.text.Anchor;
+import org.flussig.documentation.text.Reader;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Compile goal:
@@ -33,70 +41,50 @@ import java.io.IOException;
 public class DacDocCompile
     extends AbstractMojo
 {
-    /**
-     * Location of the file.
-     * @parameter expression="${project.build.directory}"
-     * @required
-     */
-    private File outputDirectory;
+    @Parameter(readonly = true, defaultValue = "${project.build.sourceDirectory}")
+    private File srcDirectory;
 
     public void execute() throws MojoExecutionException
     {
         try {
+            getLog().info( String.format("Source directory: %s", srcDirectory.getAbsolutePath()));
+
             // prepare source directory: create resource folder with images for check results (if not exists)
+            File srcResourceDirectory = new File(Reader.class.getClassLoader().getResource("circle-green-12px.png").getFile()).getParentFile();
+
+            File destResourceDirectory = Path.of(srcDirectory.getAbsolutePath(), Constants.DACDOC_RESOURCES).toFile();
+
+            if(!destResourceDirectory.exists()) {
+                destResourceDirectory.mkdir();
+            }
+
+            File destDacDocResourceDirectory = Path.of(destResourceDirectory.getAbsolutePath(), Constants.DACDOC_RESOURCES).toFile();
+
+            if(!destDacDocResourceDirectory.exists()) {
+                destDacDocResourceDirectory.mkdir();
+            }
+
+            // copy all files from source to dest
+            Files.copy(srcResourceDirectory.toPath(), destDacDocResourceDirectory.toPath());
 
             // collect all readme files
+            Set<File> readmeFiles = Reader.findMarkdownFiles(srcDirectory.toPath());
 
-            // collect all DACDOC placeholders within readme files
+            // parse and find all placeholders
+            Map<File, Set<Anchor>> parsedAnchors = Reader.parseFiles(readmeFiles);
 
-            // create map of DACDOC placeholders in readme files to DACDOC checks
-
-            // validate for consistency of DACDOC checks
-
-            // perform all DACDOC checks
+            // create map between placeholders and checks
+            var checkMap = Reader.createCheckMap(parsedAnchors);
 
             // replace DACDOC placeholders with indicators of check results
+            Map<File, String> processedFiles = Reader.getProcesedReadmeFiles(checkMap, srcDirectory.toPath());
 
             // add indicators of check results to each readme file
+            for(var fileContent: processedFiles.entrySet()) {
+                Files.writeString(fileContent.getKey().toPath(), fileContent.getValue());
+            }
         } catch(Exception e) {
             throw new MojoExecutionException("exception while executing dacdoc-maven-plugin compile goal", e);
-        }
-
-        getLog().info( "Hello, world." );
-
-        File f = outputDirectory;
-
-        if ( !f.exists() )
-        {
-            f.mkdirs();
-        }
-
-        File touch = new File( f, "touch.txt" );
-
-        FileWriter w = null;
-        try
-        {
-            w = new FileWriter( touch );
-
-            w.write( "touch.txt" );
-        }
-        catch ( IOException e )
-        {
-            throw new MojoExecutionException( "Error creating file " + touch, e );
-        }
-        finally
-        {
-            if ( w != null )
-            {
-                try
-                {
-                    w.close();
-                }
-                catch ( IOException e )
-                {
-                    // ignore
-                }
-            }
         }
     }
 }
