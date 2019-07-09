@@ -1,4 +1,4 @@
-# Whta is this file?
+# What is this file?
 This file tests usage of **dacdoc-maven-plugin**. 
 Put as many markdown elements as possible here
 

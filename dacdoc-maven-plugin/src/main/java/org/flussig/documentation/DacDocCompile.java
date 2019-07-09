@@ -50,22 +50,31 @@ public class DacDocCompile
             getLog().info( String.format("Source directory: %s", srcDirectory.getAbsolutePath()));
 
             // prepare source directory: create resource folder with images for check results (if not exists)
-            File srcResourceDirectory = new File(Reader.class.getClassLoader().getResource("circle-green-12px.png").getFile()).getParentFile();
+            File srcResourceDirectory = new File(getClass().getClassLoader().getResource("circle-green-12px.png").getFile()).getParentFile();
+            getLog().info( String.format("Resource directory: %s", srcResourceDirectory.getAbsolutePath()));
 
-            File destResourceDirectory = Path.of(srcDirectory.getAbsolutePath(), Constants.DACDOC_RESOURCES).toFile();
+            File destResourceDirectory = Path.of(srcDirectory.getAbsolutePath(), Constants.RESOURCES).toFile().getParentFile();
+            getLog().info( String.format("Dest resource directory: %s", destResourceDirectory.getAbsolutePath()));
 
             if(!destResourceDirectory.exists()) {
                 destResourceDirectory.mkdir();
+                getLog().info( String.format("Dest resource directory created: %s", destResourceDirectory.getAbsolutePath()));
+
             }
 
             File destDacDocResourceDirectory = Path.of(destResourceDirectory.getAbsolutePath(), Constants.DACDOC_RESOURCES).toFile();
+            getLog().info( String.format("DacDoc resource directory: %s", destDacDocResourceDirectory.getAbsolutePath()));
+
 
             if(!destDacDocResourceDirectory.exists()) {
                 destDacDocResourceDirectory.mkdir();
+                getLog().info( String.format("DacDoc resource directory created: %s", destDacDocResourceDirectory.getAbsolutePath()));
             }
 
             // copy all files from source to dest
             Files.copy(srcResourceDirectory.toPath(), destDacDocResourceDirectory.toPath());
+            getLog().info( String.format("Resources copied from source to dest: %s %s", srcResourceDirectory.getAbsolutePath(), destDacDocResourceDirectory.getAbsolutePath()));
+
 
             // collect all readme files
             Set<File> readmeFiles = Reader.findMarkdownFiles(srcDirectory.toPath());
@@ -84,7 +93,7 @@ public class DacDocCompile
                 Files.writeString(fileContent.getKey().toPath(), fileContent.getValue());
             }
         } catch(Exception e) {
-            throw new MojoExecutionException("exception while executing dacdoc-maven-plugin compile goal", e);
+            throw new MojoExecutionException("exception while executing dacdoc-maven-plugin compile goal " + e.getMessage());
         }
     }
 }
