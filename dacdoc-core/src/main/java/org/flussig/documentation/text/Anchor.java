@@ -8,6 +8,7 @@ import org.flussig.documentation.util.Strings;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -119,16 +120,18 @@ public final class Anchor {
         return new ValidationResult();
     }
 
+
     /**
      * Prepares text of the anchor for replacement
      * When check result is acquired, this method will return full text of anchor with DACDOC placeholder stripped away and decorations for showing check results added
      * !DACDOC{xxx}(...)! --> xxx ![test-id](./dacdoc-resources/circle-green-12px.png "comment")
      */
     public String getFullText(CheckResult testResult, Path dacdocResourceDirectory, File currentFile) {
-        String resultImage = String.format(
-                "![%s](%s \"sample comment\")",
-                id,
-                getResultImagePath(testResult, dacdocResourceDirectory, currentFile));
+        String resultImage = getCheckResultImage(
+                testResult,
+                dacdocResourceDirectory,
+                currentFile, id,
+                String.format("checked on %s", LocalDateTime.now().toString()));
 
         // if content is not empty, put content and then image reference
         if(Strings.isNullOrEmpty(argument)) {
@@ -136,6 +139,14 @@ public final class Anchor {
         } else {
             return String.format("%s %s", argument, resultImage);
         }
+    }
+
+    public static String getCheckResultImage(CheckResult testResult, Path dacdocResourceDirectory, File currentFile, String alt, String comment) {
+        return String.format(
+                "![%s](%s \"%s\")",
+                alt,
+                getResultImagePath(testResult, dacdocResourceDirectory, currentFile),
+                comment);
     }
 
     public String getFullText() {

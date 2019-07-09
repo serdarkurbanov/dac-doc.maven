@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -101,6 +102,7 @@ public class Reader {
      * loops through anchor-check map and replace anchors with results in files
      */
     public static Map<File, String> getProcesedReadmeFiles(Map<FileAnchorTuple, Check> checkMap, Path dacdocResourceFirectory) throws DacDocParseException {
+        // map file and its initial content
         Map<File, String> processedFiles = checkMap.keySet().stream()
                 .map(FileAnchorTuple::getFile)
                 .distinct()
@@ -112,7 +114,22 @@ public class Reader {
                     }
                 }));
 
-        // replace with new content
+        // map file and its list of checks
+        Map<File, List<Check>> processedFilesChecks = checkMap.entrySet().stream()
+                .collect(Collectors.groupingBy(fileCheck -> fileCheck.getKey().getFile()))
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        kv -> kv.getValue().stream().map(Map.Entry::getValue).collect(Collectors.toList())));
+
+        // create map of files and composite check
+        Map<File, Check> fileToCompositeCheckMap = processedFilesChecks.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        kv -> new CompositeCheck(kv.getValue())));
+
+        // replace anchors with new content
         for(var anchorCheck: checkMap.entrySet()) {
             Anchor anchor = anchorCheck.getKey().getAnchor();
             File file = anchorCheck.getKey().getFile();
@@ -120,9 +137,29 @@ public class Reader {
 
             CheckResult checkResult = check.execute();
 
+            // replace given anchor with test result
             String newFileContent = processedFiles
                     .get(file)
                     .replace(anchor.getFullText(), anchor.getFullText(checkResult, dacdocResourceFirectory, file));
+
+            processedFiles.replace(file, newFileContent);
+        }
+
+        // create composite checks for each file and put it in the beginning of the file
+        for(var fileCheck: fileToCompositeCheckMap.entrySet()) {
+            File file = fileCheck.getKey();
+            Check check = fileCheck.getValue();
+
+            String oldFileContent = processedFiles.get(file);
+
+            String fileCheckImageString = Anchor.getCheckResultImage(
+                    check.execute(),
+                    dacdocResourceFirectory,
+                    file,
+                    file.getName(),
+                    String.format("checked on %s", LocalDateTime.now().toString()));
+
+            String newFileContent = String.format("%s\n\n%s", fileCheckImageString, oldFileContent);
 
             processedFiles.replace(file, newFileContent);
         }

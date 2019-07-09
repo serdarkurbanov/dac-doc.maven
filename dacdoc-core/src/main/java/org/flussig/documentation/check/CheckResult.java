@@ -19,10 +19,10 @@ public enum CheckResult {
 
         if(testResults.stream().allMatch(result -> result.equals(GREEN))) {
             return GREEN;
-        } else if(testResults.stream().allMatch(result -> result.equals(RED))) {
-            return RED;
         } else if(testResults.stream().allMatch(result -> result.equals(GREY))) {
             return GREY;
+        } else if(testResults.stream().allMatch(result -> result.equals(RED) || result.equals(GREY))) {
+            return RED;
         } else {
             return ORANGE;
         }
