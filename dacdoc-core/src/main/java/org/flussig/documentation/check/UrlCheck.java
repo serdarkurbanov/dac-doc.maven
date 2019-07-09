@@ -1,10 +1,14 @@
 package org.flussig.documentation.check;
 
+import org.flussig.documentation.exception.DacDocParseException;
+
 import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Tests relative link
@@ -16,6 +20,8 @@ public class UrlCheck extends SingleExecutionCheck {
     private File readmeFile;
     private String uri;
 
+    private static Pattern mdUrlPattern = Pattern.compile(String.format("\\[(.*?)\\]\\((.*?)\\)"));
+
     /**
      * extracting uri from markdown format for link
      * options:
@@ -23,8 +29,15 @@ public class UrlCheck extends SingleExecutionCheck {
      * []() syntax: [mylink](google.com)
      * TODO: not supported now - [] syntax: [mylink] .... [mylink] = google.com
      */
-    public static String extractMarkdownUri(String argument) {
-        return null;
+    public static String extractMarkdownUri(String argument) throws DacDocParseException {
+        Matcher matcher = mdUrlPattern.matcher(argument);
+
+        // [...](...)
+        if(matcher.matches()) {
+            return matcher.group(2);
+        } else {
+            return argument;
+        }
     }
 
     public UrlCheck(File readmeFile, String uri) {

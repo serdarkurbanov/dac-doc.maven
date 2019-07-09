@@ -11,7 +11,7 @@ This is link we need to test (url check that specifies id): !DACDOC{[self](./REA
 
 This is link we need to test (url check that specifies id and other properties): !DACDOC{[self](./README.md)}(id=self-check-2;test=dacdoc-url)!
 
-This is piece of text we didn't write test for: !DACDOC{some text}(id=non-existing-check, test=non-existing-test)!
+This is piece of text we didn't write test for: !DACDOC{some text}(id=non-existing-check; test=non-existing-test)!
 
 This is composite check: !DACDOC(ids=self-check-1, self-check-2)!
 

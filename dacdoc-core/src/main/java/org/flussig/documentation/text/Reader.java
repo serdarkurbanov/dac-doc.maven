@@ -20,6 +20,13 @@ import java.util.stream.Collectors;
  * Reader accepts File handlers for given project and extracts all DacDoc anchors (placeholders)
  */
 public class Reader {
+    private static Pattern anchorPlaceholderPattern = Pattern.compile(String.format(
+            "%s%s((.|\\n|\\r)*?)%s",
+            Constants.ANCHOR_FRAMING,
+            Constants.ANCHOR_KEYWORD,
+            Constants.ANCHOR_FRAMING));
+
+
     /**
      * Get all markdown files in given directory
      */
@@ -54,11 +61,7 @@ public class Reader {
             String content = Files.readString(f.toPath());
 
             // extract all DACDOC placeholders
-            Matcher dacdocPlaceholderMatcher = Pattern.compile(String.format(
-                    "%s%s((.|\\n|\\r)*?)%s",
-                    Constants.ANCHOR_FRAMING,
-                    Constants.ANCHOR_KEYWORD,
-                    Constants.ANCHOR_FRAMING)).matcher(content);
+            Matcher dacdocPlaceholderMatcher = anchorPlaceholderPattern.matcher(content);
 
             while(dacdocPlaceholderMatcher.find()) {
                 String dacdocAnchorFullText = dacdocPlaceholderMatcher.group();
@@ -75,7 +78,7 @@ public class Reader {
     /**
      * Map file-anchor tuple to checks
      */
-    public static Map<FileAnchorTuple, Check> createCheckMap(Map<File, Set<Anchor>> fileAnchorMap) {
+    public static Map<FileAnchorTuple, Check> createCheckMap(Map<File, Set<Anchor>> fileAnchorMap) throws DacDocParseException {
         // convert fileAnchorMap to set of tuples
         Set<FileAnchorTuple> tuples = fileAnchorMap.entrySet().stream()
                 .flatMap(kv -> kv.getValue().stream().map(anchor -> new FileAnchorTuple(kv.getKey(), anchor)))
@@ -85,12 +88,19 @@ public class Reader {
         Map<FileAnchorTuple, Check> result = new HashMap<>();
 
         // first loop through anchors: assign all checks
-        fillChecksInitial(tuples);
+        fillChecksInitial(tuples, result);
 
         // second loop through anchors: put values into composite checks
         fillChecksComposite(tuples, result);
 
         return result;
+    }
+
+    /**
+     * loops through anchor-check map and replace anchors with results in files
+     */
+    public static void replaceAnchorsWithResults(Map<FileAnchorTuple, Check> checkMap) {
+
     }
 
     // TODO: avoid circular dependencies for composite checks
@@ -117,7 +127,7 @@ public class Reader {
         }
     }
 
-    private static void fillChecksInitial(Set<FileAnchorTuple> tuples) {
+    private static void fillChecksInitial(Set<FileAnchorTuple> tuples, Map<FileAnchorTuple, Check> result) throws DacDocParseException {
         Set<Check> checks = new HashSet<>();
 
         for(FileAnchorTuple fileAnchorTuple: tuples) {
@@ -126,8 +136,6 @@ public class Reader {
             if(fileAnchorTuple.getAnchor().getAnchorType() == AnchorType.COMPOSITE) {
                 // for composite type: put empty composite check
                 check = new CompositeCheck(new ArrayList());
-
-                checks.add(check);
             } else {
                 // for primitive type: define type of check and add it
                 if(fileAnchorTuple.getAnchor().getTestId().equals(Constants.DEFAULT_TEST_ID)) {
@@ -137,11 +145,13 @@ public class Reader {
                 } else {
                     check = Check.unknownCheck;
                 }
-
-                if(!checks.contains(check)) {
-                    checks.add(check);
-                }
             }
+
+            if(!checks.contains(check)) {
+                checks.add(check);
+            }
+
+            result.put(fileAnchorTuple, check);
         }
     }
 

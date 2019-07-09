@@ -1,8 +1,8 @@
 package org.flussig.documentation.text;
 
 import org.flussig.documentation.Constants;
-import org.flussig.documentation.exception.DacDocParseException;
 import org.flussig.documentation.check.CheckResult;
+import org.flussig.documentation.exception.DacDocParseException;
 import org.flussig.documentation.util.Strings;
 
 import java.util.*;
@@ -35,16 +35,6 @@ public final class Anchor {
 
         // extract content from {...} and parameters from (...)
         ContentParameterTuple contentParameterTuple = new ContentParameterTuple(fullTextStripFraming);
-
-        if(!(fullTextStripFraming.startsWith("{") || fullTextStripFraming.startsWith("(")) ||
-                (contentParameterTuple.content == null && contentParameterTuple.paremeters == null)) {
-            throw new DacDocParseException(
-                    String.format(
-                            "expected format for DACDOC placeholder parameters: %s or %s. Given string: %s",
-                            String.format("%s%s{...}(...)%s", Constants.ANCHOR_FRAMING, Constants.ANCHOR_KEYWORD, Constants.ANCHOR_FRAMING),
-                            String.format("%s%s(...)%s", Constants.ANCHOR_FRAMING, Constants.ANCHOR_KEYWORD, Constants.ANCHOR_FRAMING),
-                            fullTextStripFraming));
-        }
 
         // parameters are present
         Map<String, String> paramMap = extractParameterMap(contentParameterTuple);
@@ -91,8 +81,9 @@ public final class Anchor {
         Map<String, String> paramMap = null;
         if(!Strings.isNullOrEmpty(contentParameterTuple.paremeters)) {
             paramMap = Arrays.stream(contentParameterTuple.paremeters.split(Constants.ANCHOR_PARAMETER_SEPARATOR))
+                    .map(String::trim)
                     .map(p -> p.split(Constants.ANCHOR_PARAMETER_KEY_VALUE_SEPARATOR))
-                    .collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
+                    .collect(Collectors.toMap(kv -> kv[0].trim(), kv -> kv[1].trim()));
         }
         return paramMap;
     }
@@ -167,21 +158,34 @@ public final class Anchor {
      * Tuple of content string and parameter string of a anchor
      * */
     private static class ContentParameterTuple {
+        private static Pattern argumentPattern = Pattern.compile("\\{([^}]+)\\}");
+        private static Pattern parameterPattern = Pattern.compile("\\(([^)]*)\\)");
+        private static Pattern fullPatern = Pattern.compile("\\{([^}]+)\\}\\(([^)]*)\\)");
+
         String content;
         String paremeters;
 
-        // after stripping text is left with {...}(...) or (...)
-        public ContentParameterTuple(String fullTextStripFraming) {
-            if(fullTextStripFraming.startsWith("(")) {
-                Matcher parenthesesMatcher = Pattern.compile("\\(([^)]*)\\)").matcher(fullTextStripFraming);
-                if (parenthesesMatcher.find()) {
-                    paremeters = parenthesesMatcher.group(1);
-                }
-            }
+        // after stripping text is left with {...}(...) or (...) or {...}
+        public ContentParameterTuple(String fullTextStripFraming) throws DacDocParseException {
+            Matcher fullMatcher = fullPatern.matcher(fullTextStripFraming);
+            Matcher argumentMatcher = argumentPattern.matcher(fullTextStripFraming);
+            Matcher parameterMatcher = parameterPattern.matcher(fullTextStripFraming);
 
-            Matcher curlyBracketMatcher = Pattern.compile("\\{([^}]+)\\}").matcher(fullTextStripFraming);
-            if (curlyBracketMatcher.find()) {
-                content = curlyBracketMatcher.group(1);
+            if(fullMatcher.matches()) {
+                content = fullMatcher.group(1);
+                paremeters = fullMatcher.group(2);
+            } else if (argumentMatcher.matches()) {
+                content = argumentMatcher.group(1);
+            } else if (parameterMatcher.matches()) {
+                paremeters = parameterMatcher.group(1);
+            } else {
+                throw new DacDocParseException(
+                        String.format(
+                                "expected format for DACDOC placeholder parameters: %s or %s or %s. Given string: %s",
+                                String.format("%s%s{...}(...)%s", Constants.ANCHOR_FRAMING, Constants.ANCHOR_KEYWORD, Constants.ANCHOR_FRAMING),
+                                String.format("%s%s(...)%s", Constants.ANCHOR_FRAMING, Constants.ANCHOR_KEYWORD, Constants.ANCHOR_FRAMING),
+                                String.format("%s%s{...}%s", Constants.ANCHOR_FRAMING, Constants.ANCHOR_KEYWORD, Constants.ANCHOR_FRAMING),
+                                fullTextStripFraming));
             }
         }
     }

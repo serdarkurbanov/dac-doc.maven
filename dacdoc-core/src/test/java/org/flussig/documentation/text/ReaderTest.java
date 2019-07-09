@@ -63,7 +63,7 @@ public class ReaderTest {
             var checkMap = Reader.createCheckMap(parsedAnchors);
 
             assertEquals(10, checkMap.size());
-            assertEquals(3, new HashSet<>(checkMap.values()));
+            assertEquals(6, new HashSet<>(checkMap.values()).size());
             assertTrue(checkMap.values().stream().allMatch(x -> x != null));
         } catch(Exception e) {
             fail("DACDOC is unable map anchors to checks " + readme.getPath() + "\n" + e.getMessage());
