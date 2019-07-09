@@ -5,4 +5,6 @@ package org.flussig.documentation.check;
  */
 public interface Check {
     CheckResult execute();
+
+    static Check unknownCheck = () -> CheckResult.GREY;
 }

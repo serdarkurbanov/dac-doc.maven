@@ -1,6 +1,9 @@
 package org.flussig.documentation.text;
 
 import org.flussig.documentation.Constants;
+import org.flussig.documentation.check.Check;
+import org.flussig.documentation.check.CompositeCheck;
+import org.flussig.documentation.check.UrlCheck;
 import org.flussig.documentation.exception.DacDocException;
 import org.flussig.documentation.exception.DacDocParseException;
 
@@ -11,6 +14,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Reader accepts File handlers for given project and extracts all DacDoc anchors (placeholders)
@@ -19,8 +23,8 @@ public class Reader {
     /**
      * Get all markup files in given directory
      */
-    public static Collection<File> getMarkupFiles(Path path) throws DacDocException {
-        List<File> result = new ArrayList<>();
+    public static Set<File> findMarkupFiles(Path path) throws DacDocException {
+        Set<File> result = new HashSet<>();
 
         try {
             Files.walk(path)
@@ -66,5 +70,110 @@ public class Reader {
         }
 
         return result;
+    }
+
+    /**
+     * Map file-anchor tuple to checks
+     */
+    public static Map<FileAnchorTuple, Check> createCheckMap(Map<File, Set<Anchor>> fileAnchorMap) {
+        // convert fileAnchorMap to set of tuples
+        Set<FileAnchorTuple> tuples = fileAnchorMap.entrySet().stream()
+                .flatMap(kv -> kv.getValue().stream().map(anchor -> new FileAnchorTuple(kv.getKey(), anchor)))
+                .collect(Collectors.toSet());
+
+        // assign each tuple a check
+        Map<FileAnchorTuple, Check> result = new HashMap<>();
+
+        // first loop through anchors: assign all checks
+        fillChecksInitial(tuples);
+
+        // second loop through anchors: put values into composite checks
+        fillChecksComposite(tuples, result);
+
+        return result;
+    }
+
+    // TODO: avoid circular dependencies for composite checks
+    private static void fillChecksComposite(Set<FileAnchorTuple> tuples, Map<FileAnchorTuple, Check> result) {
+        for(FileAnchorTuple fileAnchorTuple: tuples.stream().filter(t -> t.getAnchor().getAnchorType() == AnchorType.COMPOSITE).collect(Collectors.toSet())) {
+            CompositeCheck compositeCheck = (CompositeCheck)result.get(fileAnchorTuple);
+
+            Collection<String> ids = fileAnchorTuple.getAnchor().getIds();
+
+            // find checks for all ids and attach to composite check
+            for(String id: ids) {
+                Check subCheck;
+
+                Optional<FileAnchorTuple> subTuple = tuples.stream().filter(t -> t.getAnchor().getId().equals(id)).findFirst();
+
+                if(subTuple.isEmpty()) {
+                    subCheck = Check.unknownCheck;
+                } else {
+                    subCheck = result.get(subTuple.get());
+                }
+
+                compositeCheck.getChecks().add(subCheck);
+            }
+        }
+    }
+
+    private static void fillChecksInitial(Set<FileAnchorTuple> tuples) {
+        Set<Check> checks = new HashSet<>();
+
+        for(FileAnchorTuple fileAnchorTuple: tuples) {
+            Check check;
+
+            if(fileAnchorTuple.getAnchor().getAnchorType() == AnchorType.COMPOSITE) {
+                // for composite type: put empty composite check
+                check = new CompositeCheck(new ArrayList());
+
+                checks.add(check);
+            } else {
+                // for primitive type: define type of check and add it
+                if(fileAnchorTuple.getAnchor().getTestId().equals(Constants.DEFAULT_TEST_ID)) {
+                    check = new UrlCheck(
+                            fileAnchorTuple.getFile(),
+                            UrlCheck.extractMarkupUri(fileAnchorTuple.getAnchor().getArgument()));
+                } else {
+                    check = Check.unknownCheck;
+                }
+
+                if(!checks.contains(check)) {
+                    checks.add(check);
+                }
+            }
+        }
+    }
+
+    public static class FileAnchorTuple {
+        private File file;
+        private Anchor anchor;
+
+        public FileAnchorTuple(File file, Anchor anchor) {
+            this.anchor = anchor;
+            this.file = file;
+        }
+
+        public File getFile() {
+            return file;
+        }
+
+        public Anchor getAnchor() {
+            return anchor;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            FileAnchorTuple that = (FileAnchorTuple) o;
+            return Objects.equals(file, that.file) &&
+                    Objects.equals(anchor, that.anchor);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(file, anchor);
+        }
     }
 }

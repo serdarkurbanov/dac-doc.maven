@@ -9,12 +9,16 @@ import java.util.Objects;
 /**
  * Tests relative link
  */
-public class UrlCheck implements Check {
+public class UrlCheck extends SingleExecutionCheck {
     private static final int REQUEST_TIMEOUT_MS = 500;
     private static final String REQUEST_METHOD = "GET";
 
     private File readmeFile;
     private String uri;
+
+    public static String extractMarkupUri(String argument) {
+        return null;
+    }
 
     public UrlCheck(File readmeFile, String uri) {
         this.uri = uri;
@@ -22,7 +26,7 @@ public class UrlCheck implements Check {
     }
 
     @Override
-    public CheckResult execute() {
+    public CheckResult performCheck() {
         Path uriPath = Path.of(uri);
 
         if(uriPath.isAbsolute()) {
