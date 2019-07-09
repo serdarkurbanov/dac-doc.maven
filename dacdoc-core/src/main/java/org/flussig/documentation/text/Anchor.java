@@ -109,7 +109,7 @@ public final class Anchor {
                 break;
         }
 
-        return currentFile.toPath().relativize(Path.of(dacdocResourceDirectory.toString(), imageFileName)).toString();
+        return currentFile.getParentFile().toPath().relativize(Path.of(dacdocResourceDirectory.toString(), imageFileName)).toString();
     }
 
     /**
