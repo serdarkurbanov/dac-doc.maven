@@ -3,6 +3,7 @@ package org.flussig.documentation.text;
 import org.junit.Test;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +66,31 @@ public class ReaderTest {
             assertEquals(10, checkMap.size());
             assertEquals(6, new HashSet<>(checkMap.values()).size());
             assertTrue(checkMap.values().stream().allMatch(x -> x != null));
+        } catch(Exception e) {
+            fail("DACDOC is unable map anchors to checks " + readme.getPath() + "\n" + e.getMessage());
+        }
+    }
+
+    @Test
+    public void getProcessedReadmeFiles() {
+        File readme = new File(getClass()
+                .getClassLoader()
+                .getResource("README_TEST.md")
+                .getFile());
+
+        Path parentDir = Path.of(readme.getParentFile().toString(), "classes");
+
+        Set<File> files = new HashSet<>();
+        files.add(readme);
+
+        try {
+            Map<File, Set<Anchor>> parsedAnchors = Reader.parseFiles(files);
+
+            var checkMap = Reader.createCheckMap(parsedAnchors);
+
+            Map<File, String> processedFiles = Reader.getProcesedReadmeFiles(checkMap, parentDir);
+
+            assertEquals(1, processedFiles.size());
         } catch(Exception e) {
             fail("DACDOC is unable map anchors to checks " + readme.getPath() + "\n" + e.getMessage());
         }

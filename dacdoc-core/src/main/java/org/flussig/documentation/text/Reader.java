@@ -100,9 +100,10 @@ public class Reader {
     /**
      * loops through anchor-check map and replace anchors with results in files
      */
-    public static void replaceAnchorsWithResults(Map<FileAnchorTuple, Check> checkMap) throws DacDocParseException {
+    public static Map<File, String> getProcesedReadmeFiles(Map<FileAnchorTuple, Check> checkMap, Path dacdocResourceFirectory) throws DacDocParseException {
         Map<File, String> processedFiles = checkMap.keySet().stream()
                 .map(FileAnchorTuple::getFile)
+                .distinct()
                 .collect(Collectors.toMap(f -> f, f -> {
                     try {
                         return Files.readString(f.toPath());
@@ -121,10 +122,12 @@ public class Reader {
 
             String newFileContent = processedFiles
                     .get(file)
-                    .replace(anchor.getFullText(), anchor.getFullText(checkResult));
+                    .replace(anchor.getFullText(), anchor.getFullText(checkResult, dacdocResourceFirectory, file));
 
-            processedFiles.put(file, newFileContent);
+            processedFiles.replace(file, newFileContent);
         }
+
+        return processedFiles;
     }
 
     // TODO: avoid circular dependencies for composite checks

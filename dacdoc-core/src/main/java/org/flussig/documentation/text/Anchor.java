@@ -1,10 +1,13 @@
 package org.flussig.documentation.text;
 
 import org.flussig.documentation.Constants;
+import org.flussig.documentation.check.Check;
 import org.flussig.documentation.check.CheckResult;
 import org.flussig.documentation.exception.DacDocParseException;
 import org.flussig.documentation.util.Strings;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -88,6 +91,27 @@ public final class Anchor {
         return paramMap;
     }
 
+    private static String getResultImagePath(CheckResult checkResult, Path dacdocResourceDirectory, File currentFile) {
+        String imageFileName;
+        switch(checkResult) {
+            case RED:
+                imageFileName = Constants.RED_IND;
+                break;
+            case GREEN:
+                imageFileName = Constants.GREEN_IND;
+                break;
+            case ORANGE:
+                imageFileName = Constants.ORANGE_IND;
+                break;
+            case GREY:
+            default:
+                imageFileName = Constants.GREY_IND;
+                break;
+        }
+
+        return currentFile.toPath().relativize(Path.of(dacdocResourceDirectory.toString(), imageFileName)).toString();
+    }
+
     /**
      * Check anchor for internal consistency
      */
@@ -98,9 +122,20 @@ public final class Anchor {
     /**
      * Prepares text of the anchor for replacement
      * When check result is acquired, this method will return full text of anchor with DACDOC placeholder stripped away and decorations for showing check results added
+     * !DACDOC{xxx}(...)! --> xxx ![test-id](./dacdoc-resources/circle-green-12px.png "comment")
      */
-    public String getFullText(CheckResult testResult) {
-        return null;
+    public String getFullText(CheckResult testResult, Path dacdocResourceDirectory, File currentFile) {
+        String resultImage = String.format(
+                "![%s](%s \"sample comment\")",
+                id,
+                getResultImagePath(testResult, dacdocResourceDirectory, currentFile));
+
+        // if content is not empty, put content and then image reference
+        if(Strings.isNullOrEmpty(argument)) {
+            return resultImage;
+        } else {
+            return String.format("%s %s", argument, resultImage);
+        }
     }
 
     public String getFullText() {

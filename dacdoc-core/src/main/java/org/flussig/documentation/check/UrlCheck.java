@@ -47,12 +47,17 @@ public class UrlCheck extends SingleExecutionCheck {
 
     @Override
     public CheckResult performCheck() {
-        Path uriPath = Path.of(uri);
+        try {
+            // TODO: Path doesn't work well with web uri -> need to match differently
+            Path uriPath = Path.of(uri);
 
-        if(uriPath.isAbsolute()) {
-            return executeAbsolutePath();
-        } else {
-            return executeRelativePath();
+            if(uriPath.isAbsolute()) {
+                return executeAbsolutePath();
+            } else {
+                return executeRelativePath();
+            }
+        } catch(Exception e) {
+            return CheckResult.RED;
         }
     }
 
