@@ -1,6 +1,6 @@
 # Whta is this file?
 This file tests usage of **dacdoc-maven-plugin**. 
-Put as many markup elements as possible here
+Put as many markdown elements as possible here
 
 ## Using DACDOC in header. !DACDOC{[self](./README.md)}!
 

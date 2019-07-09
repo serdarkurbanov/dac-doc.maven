@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
  */
 public class Reader {
     /**
-     * Get all markup files in given directory
+     * Get all markdown files in given directory
      */
-    public static Set<File> findMarkupFiles(Path path) throws DacDocException {
+    public static Set<File> findMarkdownFiles(Path path) throws DacDocException {
         Set<File> result = new HashSet<>();
 
         try {
@@ -133,7 +133,7 @@ public class Reader {
                 if(fileAnchorTuple.getAnchor().getTestId().equals(Constants.DEFAULT_TEST_ID)) {
                     check = new UrlCheck(
                             fileAnchorTuple.getFile(),
-                            UrlCheck.extractMarkupUri(fileAnchorTuple.getAnchor().getArgument()));
+                            UrlCheck.extractMarkdownUri(fileAnchorTuple.getAnchor().getArgument()));
                 } else {
                     check = Check.unknownCheck;
                 }

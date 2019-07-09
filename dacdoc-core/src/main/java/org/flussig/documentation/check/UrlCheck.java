@@ -16,7 +16,14 @@ public class UrlCheck extends SingleExecutionCheck {
     private File readmeFile;
     private String uri;
 
-    public static String extractMarkupUri(String argument) {
+    /**
+     * extracting uri from markdown format for link
+     * options:
+     * direct uri: google.com
+     * []() syntax: [mylink](google.com)
+     * TODO: not supported now - [] syntax: [mylink] .... [mylink] = google.com
+     */
+    public static String extractMarkdownUri(String argument) {
         return null;
     }
 
