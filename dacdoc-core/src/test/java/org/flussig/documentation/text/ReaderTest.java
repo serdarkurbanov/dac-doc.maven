@@ -16,7 +16,7 @@ public class ReaderTest {
     public void findFilesTest() {
         File readmeRoot = new File(getClass()
                 .getClassLoader()
-                .getResource("README_TEST.md")
+                .getResource("README.md")
                 .getFile())
                 .getParentFile();
 
@@ -33,7 +33,7 @@ public class ReaderTest {
     public void parseFilesTest() {
         File readme = new File(getClass()
                 .getClassLoader()
-                .getResource("README_TEST.md")
+                .getResource("README.md")
                 .getFile());
 
         Set<File> files = new HashSet<>();
@@ -52,7 +52,7 @@ public class ReaderTest {
     public void createCheckMap() {
         File readme = new File(getClass()
                 .getClassLoader()
-                .getResource("README_TEST.md")
+                .getResource("README.md")
                 .getFile());
 
         Set<File> files = new HashSet<>();
@@ -75,10 +75,10 @@ public class ReaderTest {
     public void getProcessedReadmeFiles() {
         File readme = new File(getClass()
                 .getClassLoader()
-                .getResource("README_TEST.md")
+                .getResource("README.md")
                 .getFile());
 
-        Path parentDir = Path.of(readme.getParentFile().toString(), "classes");
+        Path parentDir = Path.of(readme.getParentFile().getParentFile().toString(), "classes");
 
         Set<File> files = new HashSet<>();
         files.add(readme);

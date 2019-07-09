@@ -63,7 +63,7 @@ public class UrlCheck extends SingleExecutionCheck {
 
     private CheckResult executeRelativePath() {
         try {
-            Path testPath = Path.of(readmeFile.getPath(), uri);
+            Path testPath = Path.of(readmeFile.getParentFile().getPath(), uri);
 
             File testFile = new File(testPath.toUri());
 
