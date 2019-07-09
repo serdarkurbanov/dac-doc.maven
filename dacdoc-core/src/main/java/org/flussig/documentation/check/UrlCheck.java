@@ -4,6 +4,7 @@ import org.flussig.documentation.exception.DacDocParseException;
 
 import java.io.File;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -49,9 +50,9 @@ public class UrlCheck extends SingleExecutionCheck {
     public CheckResult performCheck() {
         try {
             // TODO: Path doesn't work well with web uri -> need to match differently
-            Path uriPath = Path.of(uri);
+            URI parsedUri = URI.create(uri);
 
-            if(uriPath.isAbsolute()) {
+            if(parsedUri.isAbsolute()) {
                 return executeAbsolutePath();
             } else {
                 return executeRelativePath();
