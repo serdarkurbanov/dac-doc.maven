@@ -47,7 +47,7 @@ public class DacDocCompile
     public void execute() throws MojoExecutionException
     {
         try {
-            File allSourceDir = srcDirectory.getParentFile().getParentFile();
+            File allSourceDir = srcDirectory.getParentFile().getParentFile().getParentFile();
 
             getLog().info( String.format("Source directory: %s", allSourceDir.getAbsolutePath()));
 
@@ -81,6 +81,8 @@ public class DacDocCompile
 
             // collect all readme files
             Set<File> readmeFiles = Reader.findMarkdownFiles(allSourceDir.toPath());
+
+            getLog().info( String.format("Readme files: %s", readmeFiles));
 
             // parse and find all placeholders
             Map<File, Set<Anchor>> parsedAnchors = Reader.parseFiles(readmeFiles);
