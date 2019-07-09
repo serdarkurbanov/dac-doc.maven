@@ -42,7 +42,7 @@ import java.util.Set;
 public class DacDocCompile
     extends AbstractMojo
 {
-    @Parameter(readonly = true, defaultValue = "${project.build.directory}")
+    @Parameter(readonly = true, defaultValue = "${project.basedir}")
     private File srcDirectory;
 
     public void execute() throws MojoExecutionException
@@ -86,7 +86,7 @@ public class DacDocCompile
     private void prepareResourceDirectory(File baseDir) throws IOException {
         File destDacDocResourceDirectory = createDacDocResourceDir(baseDir);
 
-        List<String> indicatorFileNames = Arrays.asList(Constants.GREEN_IND, Constants.GREEN_IND, Constants.ORANGE_IND, Constants.RED_IND);
+        List<String> indicatorFileNames = Arrays.asList(Constants.GREY_IND, Constants.GREEN_IND, Constants.ORANGE_IND, Constants.RED_IND);
 
         for(String indicatorFileName: indicatorFileNames) {
             Path outPath = Path.of(destDacDocResourceDirectory.getAbsolutePath(), indicatorFileName);
