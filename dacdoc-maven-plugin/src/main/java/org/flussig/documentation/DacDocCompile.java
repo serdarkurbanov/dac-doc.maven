@@ -47,37 +47,40 @@ public class DacDocCompile
     public void execute() throws MojoExecutionException
     {
         try {
-            getLog().info( String.format("Source directory: %s", srcDirectory.getAbsolutePath()));
+            File allSourceDir = srcDirectory.getParentFile().getParentFile();
+
+            getLog().info( String.format("Source directory: %s", allSourceDir.getAbsolutePath()));
 
             // prepare source directory: create resource folder with images for check results (if not exists)
-            File srcResourceDirectory = new File(getClass().getClassLoader().getResource("circle-green-12px.png").getFile()).getParentFile();
-            getLog().info( String.format("Resource directory: %s", srcResourceDirectory.getAbsolutePath()));
-
-            File destResourceDirectory = Path.of(srcDirectory.getAbsolutePath(), Constants.RESOURCES).toFile().getParentFile();
-            getLog().info( String.format("Dest resource directory: %s", destResourceDirectory.getAbsolutePath()));
-
-            if(!destResourceDirectory.exists()) {
-                destResourceDirectory.mkdir();
-                getLog().info( String.format("Dest resource directory created: %s", destResourceDirectory.getAbsolutePath()));
-
-            }
-
-            File destDacDocResourceDirectory = Path.of(destResourceDirectory.getAbsolutePath(), Constants.DACDOC_RESOURCES).toFile();
-            getLog().info( String.format("DacDoc resource directory: %s", destDacDocResourceDirectory.getAbsolutePath()));
-
-
-            if(!destDacDocResourceDirectory.exists()) {
-                destDacDocResourceDirectory.mkdir();
-                getLog().info( String.format("DacDoc resource directory created: %s", destDacDocResourceDirectory.getAbsolutePath()));
-            }
-
-            // copy all files from source to dest
-            Files.copy(srcResourceDirectory.toPath(), destDacDocResourceDirectory.toPath());
-            getLog().info( String.format("Resources copied from source to dest: %s %s", srcResourceDirectory.getAbsolutePath(), destDacDocResourceDirectory.getAbsolutePath()));
+// TODO: uncomment
+//            File srcResourceDirectory = new File(getClass().getClassLoader().getResource("circle-green-12px.png").getFile()).getParentFile();
+//            getLog().info( String.format("Resource directory: %s", srcResourceDirectory.getAbsolutePath()));
+//
+//            File destResourceDirectory = Path.of(srcDirectory.getAbsolutePath(), Constants.RESOURCES).toFile().getParentFile();
+//            getLog().info( String.format("Dest resource directory: %s", destResourceDirectory.getAbsolutePath()));
+//
+//            if(!destResourceDirectory.exists()) {
+//                destResourceDirectory.mkdir();
+//                getLog().info( String.format("Dest resource directory created: %s", destResourceDirectory.getAbsolutePath()));
+//
+//            }
+//
+//            File destDacDocResourceDirectory = Path.of(destResourceDirectory.getAbsolutePath(), Constants.DACDOC_RESOURCES).toFile();
+//            getLog().info( String.format("DacDoc resource directory: %s", destDacDocResourceDirectory.getAbsolutePath()));
+//
+//
+//            if(!destDacDocResourceDirectory.exists()) {
+//                destDacDocResourceDirectory.mkdir();
+//                getLog().info( String.format("DacDoc resource directory created: %s", destDacDocResourceDirectory.getAbsolutePath()));
+//            }
+//
+//            // copy all files from source to dest
+//            Files.copy(srcResourceDirectory.toPath(), destDacDocResourceDirectory.toPath());
+//            getLog().info( String.format("Resources copied from source to dest: %s %s", srcResourceDirectory.getAbsolutePath(), destDacDocResourceDirectory.getAbsolutePath()));
 
 
             // collect all readme files
-            Set<File> readmeFiles = Reader.findMarkdownFiles(srcDirectory.toPath());
+            Set<File> readmeFiles = Reader.findMarkdownFiles(allSourceDir.toPath());
 
             // parse and find all placeholders
             Map<File, Set<Anchor>> parsedAnchors = Reader.parseFiles(readmeFiles);
@@ -86,10 +89,11 @@ public class DacDocCompile
             var checkMap = Reader.createCheckMap(parsedAnchors);
 
             // replace DACDOC placeholders with indicators of check results
-            Map<File, String> processedFiles = Reader.getProcesedReadmeFiles(checkMap, srcDirectory.toPath());
+            Map<File, String> processedFiles = Reader.getProcesedReadmeFiles(checkMap, Path.of(allSourceDir.getAbsolutePath(), Constants.DACDOC_RESOURCES));
 
             // add indicators of check results to each readme file
             for(var fileContent: processedFiles.entrySet()) {
+
                 Files.writeString(fileContent.getKey().toPath(), fileContent.getValue());
             }
         } catch(Exception e) {
