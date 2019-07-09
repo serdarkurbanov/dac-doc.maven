@@ -91,7 +91,10 @@ public class DacDocCompile
             var checkMap = Reader.createCheckMap(parsedAnchors);
 
             // replace DACDOC placeholders with indicators of check results
-            Map<File, String> processedFiles = Reader.getProcesedReadmeFiles(checkMap, Path.of(allSourceDir.getAbsolutePath(), Constants.DACDOC_RESOURCES));
+            Path dacdocResources = Path.of(allSourceDir.getAbsolutePath(), Constants.DACDOC_RESOURCES);
+            getLog().info( String.format("DacDoc resource directory: %s", dacdocResources));
+
+            Map<File, String> processedFiles = Reader.getProcesedReadmeFiles(checkMap, dacdocResources);
 
             // add indicators of check results to each readme file
             for(var fileContent: processedFiles.entrySet()) {
