@@ -113,13 +113,21 @@ public final class Anchor {
         return currentFile.getParentFile().toPath().relativize(Path.of(dacdocResourceDirectory.toString(), imageFileName)).toString();
     }
 
+    public static String getCheckResultImage(CheckResult testResult, Path dacdocResourceDirectory, File currentFile, String alt, String comment) {
+        return String.format(
+                "![%s](%s \"%s\")",
+                alt,
+                getResultImagePath(testResult, dacdocResourceDirectory, currentFile),
+                comment);
+    }
+
+
     /**
      * Check anchor for internal consistency
      */
     public ValidationResult validate() {
         return new ValidationResult();
     }
-
 
     /**
      * Prepares text of the anchor for replacement
@@ -137,16 +145,8 @@ public final class Anchor {
         if(Strings.isNullOrEmpty(argument)) {
             return resultImage;
         } else {
-            return String.format("%s %s", argument, resultImage);
+            return String.format("%s %s", resultImage, argument);
         }
-    }
-
-    public static String getCheckResultImage(CheckResult testResult, Path dacdocResourceDirectory, File currentFile, String alt, String comment) {
-        return String.format(
-                "![%s](%s \"%s\")",
-                alt,
-                getResultImagePath(testResult, dacdocResourceDirectory, currentFile),
-                comment);
     }
 
     public String getFullText() {
