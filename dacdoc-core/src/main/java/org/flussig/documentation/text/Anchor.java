@@ -1,6 +1,8 @@
 package org.flussig.documentation.text;
 
 import org.flussig.documentation.Constants;
+import org.flussig.documentation.check.Check;
+import org.flussig.documentation.check.CheckResult;
 import org.flussig.documentation.check.CheckStatus;
 import org.flussig.documentation.exception.DacDocParseException;
 import org.flussig.documentation.util.Strings;
@@ -17,11 +19,14 @@ import java.util.stream.Collectors;
  * Class contains information of DACDOC placeholder and associated tags
  */
 public final class Anchor {
-    protected String fullText;
-    protected String id;
+    private String fullText;
+    private String id;
     private Collection<String> ids = new ArrayList<>();
     private String argument;
     private String testId;
+
+    // attached check
+    private Check check;
 
     /**
      * Generate anchor instance from full string
@@ -112,12 +117,17 @@ public final class Anchor {
         return currentFile.getParentFile().toPath().relativize(Path.of(dacdocResourceDirectory.toString(), imageFileName)).toString();
     }
 
-    public static String getCheckResultImage(CheckStatus testResult, Path dacdocResourceDirectory, File currentFile, String alt, String comment) {
+    public static String getCheckResultImage(
+            CheckResult checkResult,
+            Path dacdocResourceDirectory,
+            File currentFile,
+            String id) {
+        // TODO make multiline comment to image and add checkResult message
         return String.format(
                 "![%s](%s \"%s\")",
-                alt,
-                getResultImagePath(testResult, dacdocResourceDirectory, currentFile),
-                comment);
+                id,
+                getResultImagePath(checkResult.getStatus(), dacdocResourceDirectory, currentFile),
+                String.format("checked on %s", checkResult.getTime().toString()));
     }
 
 
@@ -133,12 +143,8 @@ public final class Anchor {
      * When check result is acquired, this method will return full text of anchor with DACDOC placeholder stripped away and decorations for showing check results added
      * !DACDOC{xxx}(...)! --> xxx ![test-id](./dacdoc-resources/circle-green-12px.png "comment")
      */
-    public String getFullText(CheckStatus testResult, Path dacdocResourceDirectory, File currentFile) {
-        String resultImage = getCheckResultImage(
-                testResult,
-                dacdocResourceDirectory,
-                currentFile, id,
-                String.format("checked on %s", LocalDateTime.now().toString()));
+    public String getTransformedText(CheckResult checkResult, Path dacdocResourceDirectory, File currentFile) {
+        String resultImage = getCheckResultImage(checkResult, dacdocResourceDirectory, currentFile, id);
 
         // if content is not empty, put content and then image reference
         if(Strings.isNullOrEmpty(argument)) {
@@ -176,6 +182,17 @@ public final class Anchor {
         }
     }
 
+    public Check getCheck() {
+        return check;
+    }
+
+    public void setCheck(Check check) {
+        this.check = check;
+    }
+
+    /**
+     * disable creation of anchor directly
+     */
     private Anchor() {}
 
     /**

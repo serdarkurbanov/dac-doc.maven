@@ -1,12 +1,15 @@
 package org.flussig.documentation.text;
 
+import org.flussig.documentation.check.Check;
 import org.junit.Test;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -61,11 +64,11 @@ public class ReaderTest {
         try {
             Map<File, Set<Anchor>> parsedAnchors = Reader.parseFiles(files);
 
-            var checkMap = Reader.createCheckMap(parsedAnchors);
+            Set<Check> checks = parsedAnchors.get(readme).stream().map(Anchor::getCheck).collect(Collectors.toSet());
 
-            assertEquals(10, checkMap.size());
-            assertEquals(5, new HashSet<>(checkMap.values()).size());
-            assertTrue(checkMap.values().stream().allMatch(x -> x != null));
+            assertEquals(10, parsedAnchors.get(readme).size());
+            assertEquals(5, checks.size());
+            assertTrue(checks.stream().allMatch(Objects::nonNull));
         } catch(Exception e) {
             fail("DACDOC is unable map anchors to checks " + readme.getPath() + "\n" + e.getMessage());
         }
@@ -86,9 +89,7 @@ public class ReaderTest {
         try {
             Map<File, Set<Anchor>> parsedAnchors = Reader.parseFiles(files);
 
-            var checkMap = Reader.createCheckMap(parsedAnchors);
-
-            Map<File, String> processedFiles = Reader.getProcessedReadmeFiles(checkMap, parentDir);
+            Map<File, String> processedFiles = Reader.getTransformedFiles(parsedAnchors, parentDir);
 
             assertEquals(1, processedFiles.size());
         } catch(Exception e) {

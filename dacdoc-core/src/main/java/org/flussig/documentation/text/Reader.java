@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,26 +73,7 @@ public class Reader {
             }
         }
 
-        return result;
-    }
-
-    /**
-     * Map file-anchor tuple to checks
-     */
-    public static Map<FileAnchorTuple, Check> createCheckMap(Map<File, Set<Anchor>> fileAnchorMap) throws DacDocParseException {
-        // convert fileAnchorMap to set of tuples
-        Set<FileAnchorTuple> tuples = fileAnchorMap.entrySet().stream()
-                .flatMap(kv -> kv.getValue().stream().map(anchor -> new FileAnchorTuple(kv.getKey(), anchor)))
-                .collect(Collectors.toSet());
-
-        // assign each tuple a check
-        Map<FileAnchorTuple, Check> result = new HashMap<>();
-
-        // first loop through anchors: assign all checks
-        fillChecksInitial(tuples, result);
-
-        // second loop through anchors: put values into composite checks
-        fillChecksComposite(tuples, result);
+        attachChecks(result);
 
         return result;
     }
@@ -101,11 +81,11 @@ public class Reader {
     /**
      * loops through anchor-check map and replace anchors with results in files
      */
-    public static Map<File, String> getProcessedReadmeFiles(Map<FileAnchorTuple, Check> checkMap, Path dacdocResourceFirectory) throws DacDocParseException {
+    public static Map<File, String> getTransformedFiles(Map<File, Set<Anchor>> checkMap, Path dacdocResourceFirectory) throws DacDocParseException {
+        Set<File> files = checkMap.keySet();
+
         // map file and its initial content
-        Map<File, String> processedFiles = checkMap.keySet().stream()
-                .map(FileAnchorTuple::getFile)
-                .distinct()
+        Map<File, String> fileContents = files.stream()
                 .collect(Collectors.toMap(f -> f, f -> {
                     try {
                         return Files.readString(f.toPath());
@@ -114,63 +94,56 @@ public class Reader {
                     }
                 }));
 
-        // map file and its list of checks
-        Map<File, List<Check>> processedFilesChecks = checkMap.entrySet().stream()
-                .collect(Collectors.groupingBy(fileCheck -> fileCheck.getKey().getFile()))
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        kv -> kv.getValue().stream().map(Map.Entry::getValue).collect(Collectors.toList())));
+        for(File file: files) {
+            String newFileContent = fileContents.get(file);
 
-        // create map of files and file-level composite check
-        Map<File, Check> fileToCompositeCheckMap = processedFilesChecks.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        kv -> new CompositeCheck(kv.getValue())));
+            // replace each anchor with new content after checks
+            for(Anchor anchor: checkMap.get(file)) {
+                Check check = anchor.getCheck();
 
-        // replace anchors with new content
-        for(var anchorCheck: checkMap.entrySet()) {
-            Anchor anchor = anchorCheck.getKey().getAnchor();
-            File file = anchorCheck.getKey().getFile();
-            Check check = anchorCheck.getValue();
+                CheckResult checkResult = check.execute();
 
-            CheckResult checkResult = check.execute();
+                // replace given anchor with test result
+                newFileContent = newFileContent.replace(
+                        anchor.getFullText(),
+                        anchor.getTransformedText(checkResult, dacdocResourceFirectory, file));
+            }
 
-            // replace given anchor with test result
-            String newFileContent = processedFiles
-                    .get(file)
-                    .replace(anchor.getFullText(), anchor.getFullText(checkResult.getStatus(), dacdocResourceFirectory, file));
+            // add aggregate check for the file to the top of the file
+            List<Check> fileChecks = checkMap.get(file).stream().map(Anchor::getCheck).collect(Collectors.toList());
+            Check aggregateFileCheck = new CompositeCheck(fileChecks);
 
-            processedFiles.replace(file, newFileContent);
+            String fileCheckImageString =
+                    Anchor.getCheckResultImage(aggregateFileCheck.execute(), dacdocResourceFirectory, file, file.getName());
+
+            newFileContent = String.format("%s\n\n%s", fileCheckImageString, newFileContent);
+
+            fileContents.replace(file, newFileContent);
         }
 
-        // create composite checks for each file and put it in the beginning of the file
-        for(var fileCheck: fileToCompositeCheckMap.entrySet()) {
-            File file = fileCheck.getKey();
-            Check check = fileCheck.getValue();
+        return fileContents;
+    }
 
-            String oldFileContent = processedFiles.get(file);
+    /**
+     * Map file-anchor tuple to checks
+     */
+    private static void attachChecks(Map<File, Set<Anchor>> fileAnchorMap) {
+        // convert fileAnchorMap to set of tuples
+        Set<FileAnchorTuple> tuples = fileAnchorMap.entrySet().stream()
+                .flatMap(kv -> kv.getValue().stream().map(anchor -> new FileAnchorTuple(kv.getKey(), anchor)))
+                .collect(Collectors.toSet());
 
-            String fileCheckImageString = Anchor.getCheckResultImage(
-                    check.execute().getStatus(),
-                    dacdocResourceFirectory,
-                    file,
-                    file.getName(),
-                    String.format("checked on %s", LocalDateTime.now().toString()));
+        // first loop through anchors: assign all checks
+        fillChecksInitial(tuples);
 
-            String newFileContent = String.format("%s\n\n%s", fileCheckImageString, oldFileContent);
-
-            processedFiles.replace(file, newFileContent);
-        }
-
-        return processedFiles;
+        // second loop through anchors: put values into composite checks
+        fillChecksComposite(tuples);
     }
 
     // TODO: avoid circular dependencies for composite checks
-    private static void fillChecksComposite(Set<FileAnchorTuple> tuples, Map<FileAnchorTuple, Check> result) {
+    private static void fillChecksComposite(Set<FileAnchorTuple> tuples) {
         for(FileAnchorTuple fileAnchorTuple: tuples.stream().filter(t -> t.getAnchor().getAnchorType() == AnchorType.COMPOSITE).collect(Collectors.toSet())) {
-            CompositeCheck compositeCheck = (CompositeCheck)result.get(fileAnchorTuple);
+            CompositeCheck compositeCheck = (CompositeCheck)fileAnchorTuple.getAnchor().getCheck();
 
             Collection<String> ids = fileAnchorTuple.getAnchor().getIds();
 
@@ -183,7 +156,7 @@ public class Reader {
                 if(subTuple.isEmpty()) {
                     subCheck = Check.unknownCheck;
                 } else {
-                    subCheck = result.get(subTuple.get());
+                    subCheck = subTuple.get().getAnchor().getCheck();
                 }
 
                 compositeCheck.getChecks().add(subCheck);
@@ -191,35 +164,31 @@ public class Reader {
         }
     }
 
-    private static void fillChecksInitial(Set<FileAnchorTuple> tuples, Map<FileAnchorTuple, Check> result) throws DacDocParseException {
-        Set<Check> checks = new HashSet<>();
-
+    private static void fillChecksInitial(Set<FileAnchorTuple> tuples) {
         for(FileAnchorTuple fileAnchorTuple: tuples) {
-            Check check;
             Anchor anchor = fileAnchorTuple.getAnchor();
             File file = fileAnchorTuple.getFile();
-
-            if(anchor.getAnchorType() == AnchorType.COMPOSITE) {
-                // for composite type: put empty composite check
-                check = new CompositeCheck(new ArrayList());
-            } else {
-                // for primitive type: define type of check and add it
-                if(anchor.getTestId().equals(Constants.DEFAULT_TEST_ID)) {
-                    check = new UrlCheck(anchor.getArgument(), file);
-                } else {
-                    check = Check.unknownCheck;
-                }
-            }
-
-            if(!checks.contains(check)) {
-                checks.add(check);
-            }
-
-            result.put(fileAnchorTuple, check);
+            anchor.setCheck(generateCheck(anchor, file));
         }
     }
 
-    public static class FileAnchorTuple {
+    private static Check generateCheck(Anchor anchor, File file) {
+        Check check;
+        if(anchor.getAnchorType() == AnchorType.COMPOSITE) {
+            // for composite type: put empty composite check
+            check = new CompositeCheck(new ArrayList());
+        } else {
+            // for primitive type: define type of check and add it
+            if(anchor.getTestId().equals(Constants.DEFAULT_TEST_ID)) {
+                check = new UrlCheck(anchor.getArgument(), file);
+            } else {
+                check = Check.unknownCheck;
+            }
+        }
+        return check;
+    }
+
+    private static class FileAnchorTuple {
         private File file;
         private Anchor anchor;
 

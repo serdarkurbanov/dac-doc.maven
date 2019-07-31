@@ -63,18 +63,14 @@ public class DacDocCompile
             // parse and find all placeholders
             Map<File, Set<Anchor>> parsedAnchors = Reader.parseFiles(readmeFiles);
 
-            // create map between placeholders and checks
-            var checkMap = Reader.createCheckMap(parsedAnchors);
-
             // replace DACDOC placeholders with indicators of check results
             Path dacdocResources = Path.of(allSourceDir.getAbsolutePath(), Constants.DACDOC_RESOURCES);
             getLog().info( String.format("DacDoc resource directory: %s", dacdocResources));
 
-            Map<File, String> processedFiles = Reader.getProcessedReadmeFiles(checkMap, dacdocResources);
+            Map<File, String> processedFiles = Reader.getTransformedFiles(parsedAnchors, dacdocResources);
 
             // add indicators of check results to each readme file
             for(var fileContent: processedFiles.entrySet()) {
-
                 Files.writeString(fileContent.getKey().toPath(), fileContent.getValue());
             }
         } catch(Exception e) {
