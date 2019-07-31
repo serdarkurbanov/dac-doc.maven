@@ -8,7 +8,6 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,9 +18,6 @@ public class UrlCheck extends SingleExecutionCheck {
     private static final int REQUEST_TIMEOUT_MS = 500;
     private static final String REQUEST_METHOD = "GET";
 
-    private File readmeFile;
-    private String uri;
-
     private static Pattern mdUrlPattern = Pattern.compile(String.format("\\[(.*?)\\]\\((.*?)\\)"));
 
     /**
@@ -31,7 +27,7 @@ public class UrlCheck extends SingleExecutionCheck {
      * []() syntax: [mylink](google.com)
      * TODO: not supported now - [] syntax: [mylink] .... [mylink] = google.com
      */
-    public static String extractMarkdownUri(String argument) throws DacDocParseException {
+    private static String extractMarkdownUri(String argument) throws DacDocParseException {
         Matcher matcher = mdUrlPattern.matcher(argument);
 
         // [...](...)
@@ -42,29 +38,30 @@ public class UrlCheck extends SingleExecutionCheck {
         }
     }
 
-    public UrlCheck(File readmeFile, String uri) {
-        this.uri = uri;
-        this.readmeFile = readmeFile;
+    public UrlCheck(String argument, File file) {
+        super(argument, file);
     }
 
     @Override
     public CheckResult performCheck() {
         try {
+            String uri = extractMarkdownUri(argument);
+
             URI parsedUri = URI.create(uri);
 
             if(parsedUri.isAbsolute()) {
-                return executeAbsolutePath();
+                return executeAbsolutePath(uri);
             } else {
-                return executeRelativePath();
+                return executeRelativePath(uri);
             }
         } catch(Exception e) {
             return new CheckResult(e.getMessage(), LocalDateTime.now(), CheckStatus.RED);
         }
     }
 
-    private CheckResult executeRelativePath() {
+    private CheckResult executeRelativePath(String uri) {
         try {
-            Path testPath = Path.of(readmeFile.getParentFile().getPath(), uri);
+            Path testPath = Path.of(file.getParentFile().getPath(), uri);
 
             File testFile = new File(testPath.toUri());
 
@@ -76,7 +73,7 @@ public class UrlCheck extends SingleExecutionCheck {
         }
     }
 
-    private CheckResult executeAbsolutePath() {
+    private CheckResult executeAbsolutePath(String uri) {
         try {
             URL url = new URL(uri);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -93,19 +90,5 @@ public class UrlCheck extends SingleExecutionCheck {
         } catch(Exception e) {
             return new CheckResult(e.getMessage(), LocalDateTime.now(), CheckStatus.RED);
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UrlCheck that = (UrlCheck) o;
-        return Objects.equals(readmeFile, that.readmeFile) &&
-                Objects.equals(uri, that.uri);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(readmeFile, uri);
     }
 }

@@ -1,7 +1,6 @@
 package org.flussig.documentation.check;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -9,13 +8,14 @@ import java.util.stream.Collectors;
  * Checks multiple checks
  */
 public class CompositeCheck extends SingleExecutionCheck {
-    Collection<Check> checks = new ArrayList<>();
+    Collection<Check> checks;
 
     public Collection<Check> getChecks() {
         return checks;
     }
 
     public CompositeCheck(Collection<Check> checks) {
+        super(null, null);
         this.checks = checks;
     }
 

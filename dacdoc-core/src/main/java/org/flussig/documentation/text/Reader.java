@@ -204,8 +204,8 @@ public class Reader {
                 // for primitive type: define type of check and add it
                 if(fileAnchorTuple.getAnchor().getTestId().equals(Constants.DEFAULT_TEST_ID)) {
                     check = new UrlCheck(
-                            fileAnchorTuple.getFile(),
-                            UrlCheck.extractMarkdownUri(fileAnchorTuple.getAnchor().getArgument()));
+                            fileAnchorTuple.getAnchor().getArgument(),
+                            fileAnchorTuple.getFile());
                 } else {
                     check = Check.unknownCheck;
                 }
