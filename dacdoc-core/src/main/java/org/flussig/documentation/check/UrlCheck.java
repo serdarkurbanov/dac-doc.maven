@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,7 +50,6 @@ public class UrlCheck extends SingleExecutionCheck {
     @Override
     public CheckResult performCheck() {
         try {
-            // TODO: Path doesn't work well with web uri -> need to match differently
             URI parsedUri = URI.create(uri);
 
             if(parsedUri.isAbsolute()) {
@@ -58,7 +58,7 @@ public class UrlCheck extends SingleExecutionCheck {
                 return executeRelativePath();
             }
         } catch(Exception e) {
-            return CheckResult.RED;
+            return new CheckResult(e.getMessage(), LocalDateTime.now(), CheckStatus.RED);
         }
     }
 
@@ -68,9 +68,11 @@ public class UrlCheck extends SingleExecutionCheck {
 
             File testFile = new File(testPath.toUri());
 
-            return testFile.exists() ? CheckResult.GREEN : CheckResult.RED;
+            return testFile.exists() ?
+                    new CheckResult("", LocalDateTime.now(), CheckStatus.GREEN) :
+                    new CheckResult("", LocalDateTime.now(), CheckStatus.RED);
         } catch(Exception e) {
-            return CheckResult.RED;
+            return new CheckResult(e.getMessage(), LocalDateTime.now(), CheckStatus.RED);
         }
     }
 
@@ -84,12 +86,12 @@ public class UrlCheck extends SingleExecutionCheck {
             int responseCode = con.getResponseCode();
 
             if(responseCode > 299) {
-                return CheckResult.RED;
+                return new CheckResult("", LocalDateTime.now(), CheckStatus.RED);
             } else {
-                return CheckResult.GREEN;
+                return new CheckResult("", LocalDateTime.now(), CheckStatus.GREEN);
             }
         } catch(Exception e) {
-            return CheckResult.RED;
+            return new CheckResult(e.getMessage(), LocalDateTime.now(), CheckStatus.RED);
         }
     }
 

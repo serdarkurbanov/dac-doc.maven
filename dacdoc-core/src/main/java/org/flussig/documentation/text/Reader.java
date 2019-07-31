@@ -140,7 +140,7 @@ public class Reader {
             // replace given anchor with test result
             String newFileContent = processedFiles
                     .get(file)
-                    .replace(anchor.getFullText(), anchor.getFullText(checkResult, dacdocResourceFirectory, file));
+                    .replace(anchor.getFullText(), anchor.getFullText(checkResult.getStatus(), dacdocResourceFirectory, file));
 
             processedFiles.replace(file, newFileContent);
         }
@@ -153,7 +153,7 @@ public class Reader {
             String oldFileContent = processedFiles.get(file);
 
             String fileCheckImageString = Anchor.getCheckResultImage(
-                    check.execute(),
+                    check.execute().getStatus(),
                     dacdocResourceFirectory,
                     file,
                     file.getName(),

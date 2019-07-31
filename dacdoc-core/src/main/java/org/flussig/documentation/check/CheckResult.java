@@ -1,30 +1,30 @@
 package org.flussig.documentation.check;
 
-import java.util.Collection;
+import java.time.LocalDateTime;
 
 /**
- * Result of the check
- * GREY: check not found or failed to execute
- * GREEN: check passed successfully
- * ORANGE: some tests a composite check have passed successfully, some are not
- * RED: check failed
+ * Full information on the result of the test: message, status etc
  */
-public enum CheckResult {
-    GREY, GREEN, ORANGE, RED;
+public class CheckResult {
+    private String message;
+    private LocalDateTime time;
+    private CheckStatus status;
 
-    public static CheckResult fromMultiple(Collection<CheckResult> testResults) {
-        if(testResults == null || testResults.isEmpty()) {
-            return GREY;
-        }
+    public CheckResult(String message, LocalDateTime time, CheckStatus status) {
+        this.message = message;
+        this.time = time;
+        this.status = status;
+    }
 
-        if(testResults.stream().allMatch(result -> result.equals(GREEN))) {
-            return GREEN;
-        } else if(testResults.stream().allMatch(result -> result.equals(GREY))) {
-            return GREY;
-        } else if(testResults.stream().allMatch(result -> result.equals(RED) || result.equals(GREY))) {
-            return RED;
-        } else {
-            return ORANGE;
-        }
+    public String getMessage() {
+        return message;
+    }
+
+    public LocalDateTime getTime() {
+        return time;
+    }
+
+    public CheckStatus getStatus() {
+        return status;
     }
 }

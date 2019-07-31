@@ -1,5 +1,6 @@
 package org.flussig.documentation.check;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -22,6 +23,9 @@ public class CompositeCheck extends SingleExecutionCheck {
     public CheckResult performCheck() {
         Collection<CheckResult> results = checks.stream().map(Check::execute).collect(Collectors.toList());
 
-        return CheckResult.fromMultiple(results);
+        CheckStatus aggregateStatus =
+                CheckStatus.fromMultiple(results.stream().map(CheckResult::getStatus).collect(Collectors.toSet()));
+
+        return new CheckResult("", LocalDateTime.now(), aggregateStatus);
     }
 }

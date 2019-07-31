@@ -1,8 +1,7 @@
 package org.flussig.documentation.text;
 
 import org.flussig.documentation.Constants;
-import org.flussig.documentation.check.Check;
-import org.flussig.documentation.check.CheckResult;
+import org.flussig.documentation.check.CheckStatus;
 import org.flussig.documentation.exception.DacDocParseException;
 import org.flussig.documentation.util.Strings;
 
@@ -92,9 +91,9 @@ public final class Anchor {
         return paramMap;
     }
 
-    private static String getResultImagePath(CheckResult checkResult, Path dacdocResourceDirectory, File currentFile) {
+    private static String getResultImagePath(CheckStatus checkStatus, Path dacdocResourceDirectory, File currentFile) {
         String imageFileName;
-        switch(checkResult) {
+        switch(checkStatus) {
             case RED:
                 imageFileName = Constants.RED_IND;
                 break;
@@ -113,7 +112,7 @@ public final class Anchor {
         return currentFile.getParentFile().toPath().relativize(Path.of(dacdocResourceDirectory.toString(), imageFileName)).toString();
     }
 
-    public static String getCheckResultImage(CheckResult testResult, Path dacdocResourceDirectory, File currentFile, String alt, String comment) {
+    public static String getCheckResultImage(CheckStatus testResult, Path dacdocResourceDirectory, File currentFile, String alt, String comment) {
         return String.format(
                 "![%s](%s \"%s\")",
                 alt,
@@ -134,7 +133,7 @@ public final class Anchor {
      * When check result is acquired, this method will return full text of anchor with DACDOC placeholder stripped away and decorations for showing check results added
      * !DACDOC{xxx}(...)! --> xxx ![test-id](./dacdoc-resources/circle-green-12px.png "comment")
      */
-    public String getFullText(CheckResult testResult, Path dacdocResourceDirectory, File currentFile) {
+    public String getFullText(CheckStatus testResult, Path dacdocResourceDirectory, File currentFile) {
         String resultImage = getCheckResultImage(
                 testResult,
                 dacdocResourceDirectory,
