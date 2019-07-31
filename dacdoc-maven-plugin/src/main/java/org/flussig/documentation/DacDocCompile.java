@@ -70,7 +70,7 @@ public class DacDocCompile
             Path dacdocResources = Path.of(allSourceDir.getAbsolutePath(), Constants.DACDOC_RESOURCES);
             getLog().info( String.format("DacDoc resource directory: %s", dacdocResources));
 
-            Map<File, String> processedFiles = Reader.getProcesedReadmeFiles(checkMap, dacdocResources);
+            Map<File, String> processedFiles = Reader.getProcessedReadmeFiles(checkMap, dacdocResources);
 
             // add indicators of check results to each readme file
             for(var fileContent: processedFiles.entrySet()) {

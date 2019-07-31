@@ -101,7 +101,7 @@ public class Reader {
     /**
      * loops through anchor-check map and replace anchors with results in files
      */
-    public static Map<File, String> getProcesedReadmeFiles(Map<FileAnchorTuple, Check> checkMap, Path dacdocResourceFirectory) throws DacDocParseException {
+    public static Map<File, String> getProcessedReadmeFiles(Map<FileAnchorTuple, Check> checkMap, Path dacdocResourceFirectory) throws DacDocParseException {
         // map file and its initial content
         Map<File, String> processedFiles = checkMap.keySet().stream()
                 .map(FileAnchorTuple::getFile)
@@ -123,7 +123,7 @@ public class Reader {
                         Map.Entry::getKey,
                         kv -> kv.getValue().stream().map(Map.Entry::getValue).collect(Collectors.toList())));
 
-        // create map of files and composite check
+        // create map of files and file-level composite check
         Map<File, Check> fileToCompositeCheckMap = processedFilesChecks.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -196,16 +196,16 @@ public class Reader {
 
         for(FileAnchorTuple fileAnchorTuple: tuples) {
             Check check;
+            Anchor anchor = fileAnchorTuple.getAnchor();
+            File file = fileAnchorTuple.getFile();
 
-            if(fileAnchorTuple.getAnchor().getAnchorType() == AnchorType.COMPOSITE) {
+            if(anchor.getAnchorType() == AnchorType.COMPOSITE) {
                 // for composite type: put empty composite check
                 check = new CompositeCheck(new ArrayList());
             } else {
                 // for primitive type: define type of check and add it
-                if(fileAnchorTuple.getAnchor().getTestId().equals(Constants.DEFAULT_TEST_ID)) {
-                    check = new UrlCheck(
-                            fileAnchorTuple.getAnchor().getArgument(),
-                            fileAnchorTuple.getFile());
+                if(anchor.getTestId().equals(Constants.DEFAULT_TEST_ID)) {
+                    check = new UrlCheck(anchor.getArgument(), file);
                 } else {
                     check = Check.unknownCheck;
                 }

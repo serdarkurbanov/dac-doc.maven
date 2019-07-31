@@ -88,7 +88,7 @@ public class ReaderTest {
 
             var checkMap = Reader.createCheckMap(parsedAnchors);
 
-            Map<File, String> processedFiles = Reader.getProcesedReadmeFiles(checkMap, parentDir);
+            Map<File, String> processedFiles = Reader.getProcessedReadmeFiles(checkMap, parentDir);
 
             assertEquals(1, processedFiles.size());
         } catch(Exception e) {
